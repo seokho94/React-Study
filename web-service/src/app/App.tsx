@@ -1,7 +1,14 @@
-import HomePage from '@/pages/home/HomePage';
+import { Routes, Route } from "react-router-dom";
+import { routes } from "@/shared/router/routes";
 
 function App() {
-  return <HomePage />;
+	return (
+		<Routes>
+			{routes.map((route, index) => (
+				<Route key={index} path={route.path} element={route.element} />
+			))}
+		</Routes>
+	)
 }
 
 export default App;
