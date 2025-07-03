@@ -1,4 +1,6 @@
 import React from "react";
+import { Link } from "react-router-dom";
+import { menus } from "@/shared/menu/sidebarMenu";
 import {
 		AppBar,
 		Box,
@@ -7,6 +9,7 @@ import {
 		Drawer,
 		List,
 		ListItem,
+		ListItemButton,
 		ListItemText,
 		Toolbar,
 		Typography,
@@ -43,9 +46,11 @@ const BaseLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 				<Toolbar />
 				<Divider />
 				<List>
-					{['통합현황', '대시보드', '통계', '사용자'].map((text, index) => (
-						<ListItem component="button">
-							<ListItemText primary={text} />
+					{menus.map((menu, index) => (
+						<ListItem key={menu.value} disablePadding>
+							<ListItemButton key={menu.key} component={Link} to={`/${menu.key}`}>
+								<ListItemText primary={menu.value} />
+							</ListItemButton>
 						</ListItem>
 					))}
 				</List>
