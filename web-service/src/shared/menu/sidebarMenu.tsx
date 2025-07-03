@@ -1,5 +1,9 @@
 export const menus: {key: string; value: string }[] = [
 	{
+		key: '',
+		value: '홈',
+	},
+	{
 		key: 'integrated',
 		value: '통합현황',
 	},

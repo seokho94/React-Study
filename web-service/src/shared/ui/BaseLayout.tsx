@@ -1,5 +1,5 @@
 import React from "react";
-import { Link } from "react-router-dom";
+import { Link, Outlet } from "react-router-dom";
 import { menus } from "@/shared/menu/sidebarMenu";
 import {
 		AppBar,
@@ -17,7 +17,7 @@ import {
 
 const drawerWidth = 240;
 
-const BaseLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+const BaseLayout= () => {
 	return (
 		<Box sx={{ display: 'flex' }}>
 			<CssBaseline />
@@ -59,7 +59,7 @@ const BaseLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 			{/* 메인 컨텐츠 영역 */}
 			<Box component="main" sx={{ flexGrow: 1, p: 3, marginLeft: `${drawerWidth}px` }}>
 				<Toolbar />
-				{children}
+				<Outlet />
 			</Box>
 		</Box>
 	);
