@@ -1,5 +1,8 @@
 import TestPage from "@/pages/home/TestPage";
 import MainPage from "@/pages/main/MainPage";
+import PrimeTreePage from "@/pages/prime-tree/PrimeTreePage";
+import CustomTreePage from "@/pages/custom-tree/CustomTreePage";
+import ComplexTreePage from "@/pages/complex-tree/ComplexTreePage";
 import type { RouteObject } from "react-router-dom";
 
 export const routes: RouteObject[] = [
@@ -10,5 +13,17 @@ export const routes: RouteObject[] = [
 	{
 		path: "test",
 		element: <TestPage />,
+	},
+	{
+		path: "prime-tree",
+		element: <PrimeTreePage />,
+	},
+	{
+		path: "custom-tree",
+		element: <CustomTreePage />,
+	},
+	{
+		path: "complex-tree",
+		element: <ComplexTreePage />,
 	},
 ];

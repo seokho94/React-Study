@@ -4,12 +4,16 @@ export const menus: {key: string; value: string }[] = [
 		value: '홈',
 	},
 	{
-		key: 'integrated',
-		value: '통합현황',
+		key: 'prime-tree',
+		value: 'prime-tree',
 	},
 	{
-		key: 'dashboard',
-		value: '대시보드',
+		key: 'custom-tree',
+		value: 'custom-tree',
+	},
+	{
+		key: 'complex-tree',
+		value: 'complex-tree',
 	},
 	{
 		key: 'statistics',
