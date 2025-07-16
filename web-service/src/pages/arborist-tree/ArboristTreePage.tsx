@@ -1,7 +1,8 @@
 import { Box, Button, TextField, Typography, Paper, Stack } from '@mui/material';
 import { DataGrid, type GridColDef } from '@mui/x-data-grid';
 import { Tree } from 'react-arborist';
-import type { NodeRendererProps } from 'react-arborist';
+import type { NodeRendererProps, CreateHandler, RenameHandler, MoveHandler, DeleteHandler } from 'react-arborist';
+import { useState, useCallback } from 'react';
 
 // 트리 데이터 타입 정의
 type TreeNode = {
@@ -10,8 +11,8 @@ type TreeNode = {
   children?: TreeNode[];
 };
 
-// react-arborist용 트리 데이터
-const treeData: TreeNode[] = [
+// 초기 트리 데이터
+const initialTreeData: TreeNode[] = [
   {
     id: "root",
     name: "ROOT",
@@ -59,6 +60,143 @@ const rows = [
 ];
 
 const ArboristTreePage = () => {
+  const [treeData, setTreeData] = useState<TreeNode[]>(initialTreeData);
+  const [searchTerm, setSearchTerm] = useState('');
+
+  // 노드 생성
+  const handleCreate: CreateHandler<TreeNode> = useCallback((args) => {
+    const newNode: TreeNode = {
+      id: `node-${Date.now()}`,
+      name: 'New Node',
+      children: args.type === 'internal' ? [] : undefined,
+    };
+
+    setTreeData(prevData => {
+      const updateNode = (nodes: TreeNode[]): TreeNode[] => {
+        return nodes.map(node => {
+          if (node.id === args.parentId) {
+            return {
+              ...node,
+              children: [...(node.children || []), newNode],
+            };
+          }
+          if (node.children) {
+            return {
+              ...node,
+              children: updateNode(node.children),
+            };
+          }
+          return node;
+        });
+      };
+      return updateNode(prevData);
+    });
+
+    return { id: newNode.id };
+  }, []);
+
+  // 노드 이름 변경
+  const handleRename: RenameHandler<TreeNode> = useCallback((args) => {
+    setTreeData(prevData => {
+      const updateNode = (nodes: TreeNode[]): TreeNode[] => {
+        return nodes.map(node => {
+          if (node.id === args.id) {
+            return { ...node, name: args.name };
+          }
+          if (node.children) {
+            return {
+              ...node,
+              children: updateNode(node.children),
+            };
+          }
+          return node;
+        });
+      };
+      return updateNode(prevData);
+    });
+  }, []);
+
+  // 노드 이동
+  const handleMove: MoveHandler<TreeNode> = useCallback((args) => {
+    setTreeData(prevData => {
+      // 노드 찾기 및 제거
+      let movedNode: TreeNode | null = null;
+      const removeNode = (nodes: TreeNode[]): TreeNode[] => {
+        return nodes.filter(node => {
+          if (node.id === args.dragIds[0]) {
+            movedNode = node;
+            return false;
+          }
+          if (node.children) {
+            node.children = removeNode(node.children);
+          }
+          return true;
+        });
+      };
+
+      // 노드 추가
+      const addNode = (nodes: TreeNode[]): TreeNode[] => {
+        return nodes.map(node => {
+          if (node.id === args.parentId) {
+            return {
+              ...node,
+              children: [...(node.children || []), movedNode!],
+            };
+          }
+          if (node.children) {
+            return {
+              ...node,
+              children: addNode(node.children),
+            };
+          }
+          return node;
+        });
+      };
+
+      let newData = removeNode([...prevData]);
+      if (movedNode) {
+        newData = addNode(newData);
+      }
+      return newData;
+    });
+  }, []);
+
+  // 노드 삭제
+  const handleDelete: DeleteHandler<TreeNode> = useCallback((args) => {
+    setTreeData(prevData => {
+      const removeNode = (nodes: TreeNode[]): TreeNode[] => {
+        return nodes.filter(node => {
+          if (args.ids.includes(node.id)) {
+            return false;
+          }
+          if (node.children) {
+            node.children = removeNode(node.children);
+          }
+          return true;
+        });
+      };
+      return removeNode([...prevData]);
+    });
+  }, []);
+
+  // 검색 필터링
+  const filteredData = useCallback(() => {
+    if (!searchTerm) return treeData;
+
+    const filterNodes = (nodes: TreeNode[]): TreeNode[] => {
+      return nodes.filter(node => {
+        const matchesSearch = node.name.toLowerCase().includes(searchTerm.toLowerCase());
+        const hasMatchingChildren = node.children && filterNodes(node.children).length > 0;
+        return matchesSearch || hasMatchingChildren;
+      }).map(node => ({
+        ...node,
+        children: node.children ? filterNodes(node.children) : undefined,
+      }));
+    };
+
+    return filterNodes(treeData);
+  }, [treeData, searchTerm]);
+
   return (
     <Box sx={{ height: '100%', width: '100%' }}>
       {/* 상단 타이틀 및 검색/버튼 영역 */}
@@ -66,7 +204,13 @@ const ArboristTreePage = () => {
       <Paper sx={{ p: 2, mb: 2 }}>
         <Stack direction="row" spacing={2} alignItems="center">
           {/* 검색 입력 */}
-          <TextField label="그룹명/장비명/IP 검색" size="small" variant="outlined" />
+          <TextField 
+            label="트리 검색" 
+            size="small" 
+            variant="outlined"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
           {/* 버튼들 */}
           <Button variant="contained">장비추가</Button>
           <Button variant="outlined">장비삭제</Button>
@@ -78,7 +222,16 @@ const ArboristTreePage = () => {
         {/* 좌측 트리 영역 */}
         <Paper sx={{ width: 250, mr: 2, p: 1, overflow: 'auto' }}>
           {/* React Arborist Tree 컴포넌트 */}
-          <Tree initialData={treeData}>
+          <Tree
+            data={filteredData()}
+            onCreate={handleCreate}
+            onRename={handleRename}
+            onMove={handleMove}
+            onDelete={handleDelete}
+            openByDefault={false}
+            indent={24}
+            rowHeight={32}
+          >
             {Node}
           </Tree>
         </Paper>
