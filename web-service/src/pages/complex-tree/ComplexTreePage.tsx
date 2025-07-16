@@ -3,14 +3,20 @@ import { DataGrid, type GridColDef } from '@mui/x-data-grid';
 import { UncontrolledTreeEnvironment, Tree, StaticTreeDataProvider } from 'react-complex-tree';
 import 'react-complex-tree/lib/style-modern.css';
 
-// 샘플 트리 데이터
+// react-complex-tree용 계층적 트리 데이터 구조
 const treeData = {
   items: {
     root: {
       index: 'root',
       isFolder: true,
-      children: ['system', 'network', 'database'],
+      children: ['main-root'],
       data: 'ROOT',
+    },
+    'main-root': {
+      index: 'main-root',
+      isFolder: true,
+      children: ['system', 'network', 'database'],
+      data: 'Root',
     },
     system: {
       index: 'system',
