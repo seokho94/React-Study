@@ -3,8 +3,15 @@ import { DataGrid, type GridColDef } from '@mui/x-data-grid';
 import { Tree } from 'react-arborist';
 import type { NodeRendererProps } from 'react-arborist';
 
+// 트리 데이터 타입 정의
+type TreeNode = {
+  id: string;
+  name: string;
+  children?: TreeNode[];
+};
+
 // react-arborist용 트리 데이터
-const treeData = [
+const treeData: TreeNode[] = [
   {
     id: "root",
     name: "ROOT",
@@ -94,7 +101,7 @@ const ArboristTreePage = () => {
   );
 };
 
-function Node({ node, style, dragHandle }: NodeRendererProps<{ id: string; name: string; children?: any[] }>) {
+function Node({ node, style, dragHandle }: NodeRendererProps<TreeNode>) {
   /* This node instance can do many things. See the API reference. */
   return (
     <div style={style} ref={dragHandle}>
