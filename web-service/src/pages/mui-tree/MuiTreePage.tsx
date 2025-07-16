@@ -2,9 +2,10 @@ import { Box, Button, TextField, Typography, Paper, Stack } from '@mui/material'
 import { DataGrid, type GridColDef } from '@mui/x-data-grid';
 import { RichTreeView } from '@mui/x-tree-view';
 import type { TreeViewBaseItem } from '@mui/x-tree-view/models';
+import { useState, useMemo } from 'react';
 
 // MUI X Tree View용 트리 데이터
-const treeData: TreeViewBaseItem[] = [
+const initialTreeData: TreeViewBaseItem[] = [
   {
     id: 'root',
     label: 'ROOT',
@@ -54,6 +55,63 @@ const rows = [
 ];
 
 const MuiTreePage = () => {
+  const [searchTerm, setSearchTerm] = useState('');
+
+  // 검색 필터링 로직
+  const filteredTreeData = useMemo(() => {
+    if (!searchTerm.trim()) return initialTreeData;
+
+    const searchLower = searchTerm.toLowerCase();
+    
+    // 재귀적으로 트리를 필터링하는 함수
+    const filterTree = (nodes: TreeViewBaseItem[]): TreeViewBaseItem[] => {
+      return nodes
+        .map(node => {
+          // 현재 노드가 검색어와 일치하는지 확인
+          const isMatch = node.label.toLowerCase().includes(searchLower);
+          
+          // 자식 노드들을 재귀적으로 필터링
+          const filteredChildren = node.children 
+            ? filterTree(node.children)
+            : undefined;
+          
+          // 현재 노드가 일치하거나 자식 노드 중 일치하는 것이 있으면 포함
+          if (isMatch || (filteredChildren && filteredChildren.length > 0)) {
+            return {
+              ...node,
+              children: filteredChildren,
+            } as TreeViewBaseItem;
+          }
+          
+          return null;
+        })
+        .filter((node): node is TreeViewBaseItem => node !== null);
+    };
+
+    return filterTree(initialTreeData);
+  }, [searchTerm]);
+
+  // 확장된 아이템들 계산 (검색 결과에 따라 자동 확장)
+  const expandedItems = useMemo(() => {
+    if (!searchTerm.trim()) {
+      return ['root', 'system', 'network', 'database'];
+    }
+
+    // 검색 결과에 포함된 모든 노드 ID를 수집
+    const collectIds = (nodes: TreeViewBaseItem[]): string[] => {
+      const ids: string[] = [];
+      nodes.forEach(node => {
+        ids.push(node.id);
+        if (node.children) {
+          ids.push(...collectIds(node.children));
+        }
+      });
+      return ids;
+    };
+
+    return collectIds(filteredTreeData);
+  }, [filteredTreeData, searchTerm]);
+
   return (
     <Box sx={{ height: '100%', width: '100%' }}>
       {/* 상단 타이틀 및 검색/버튼 영역 */}
@@ -61,7 +119,15 @@ const MuiTreePage = () => {
       <Paper sx={{ p: 2, mb: 2 }}>
         <Stack direction="row" spacing={2} alignItems="center">
           {/* 검색 입력 */}
-          <TextField label="그룹명/장비명/IP 검색" size="small" variant="outlined" />
+          <TextField 
+            label="트리 검색" 
+            size="small" 
+            variant="outlined"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            placeholder="노드 이름을 입력하세요..."
+            sx={{ minWidth: 200 }}
+          />
           {/* 버튼들 */}
           <Button variant="contained">장비추가</Button>
           <Button variant="outlined">장비삭제</Button>
@@ -74,8 +140,9 @@ const MuiTreePage = () => {
         <Paper sx={{ width: 250, mr: 2, p: 1, overflow: 'auto' }}>
           {/* MUI X Tree View 컴포넌트 */}
           <RichTreeView
-            items={treeData}
-            defaultExpandedItems={['root', 'system', 'network', 'database']}
+            items={filteredTreeData}
+            defaultExpandedItems={expandedItems}
+            expandedItems={expandedItems}
           />
         </Paper>
         {/* 우측 그리드 영역 */}

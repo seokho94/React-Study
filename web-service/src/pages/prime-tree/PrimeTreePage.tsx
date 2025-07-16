@@ -1,25 +1,46 @@
-import React from 'react';
+import React, { useState, useMemo } from 'react';
 import { Box, Button, TextField, Typography, Paper, Stack } from '@mui/material';
 import { DataGrid, type GridColDef } from '@mui/x-data-grid';
 import { Tree } from 'primereact/tree';
 import 'primereact/resources/themes/lara-light-blue/theme.css';
 import 'primereact/resources/primereact.min.css';
 
-// 샘플 트리 데이터
-const treeData = [
+// PrimeReact Tree 노드 타입 정의
+type TreeNode = {
+  key: string;
+  label: string;
+  children?: TreeNode[];
+};
+
+// 초기 샘플 트리 데이터
+const initialTreeData: TreeNode[] = [
   {
-    key: '0',
+    key: 'root',
     label: 'ROOT',
     children: [
-      { key: '0-0', label: 'DBMS' },
-      { key: '0-1', label: 'k8s' },
-      { key: '0-2', label: 'NMS' },
-      { key: '0-3', label: 'SMS' },
-      { key: '0-4', label: 'Test3' },
-      { key: '0-5', label: 'Test' },
-      { key: '0-6', label: 'TEST' },
-      { key: '0-7', label: 'TestGroup' },
-      { key: '0-8', label: 'WMS' },
+      {
+        key: 'system',
+        label: 'System',
+        children: [
+          { key: 'k8s', label: 'Kubernetes' },
+          { key: 'wms', label: 'WMS' },
+        ],
+      },
+      {
+        key: 'network',
+        label: 'Network',
+        children: [
+          { key: 'nms', label: 'NMS' },
+          { key: 'sms', label: 'SMS' },
+        ],
+      },
+      {
+        key: 'database',
+        label: 'Database',
+        children: [
+          { key: 'dbms', label: 'DBMS' },
+        ],
+      },
     ],
   },
 ];
@@ -42,6 +63,41 @@ const rows = [
 const PrimeTreePage = () => {
   // 트리 선택 상태 관리
   const [selectedKey, setSelectedKey] = React.useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState('');
+
+  // 검색 필터링 로직
+  const filteredTreeData = useMemo(() => {
+    if (!searchTerm.trim()) return initialTreeData;
+
+    const searchLower = searchTerm.toLowerCase();
+    
+    // 재귀적으로 트리를 필터링하는 함수
+    const filterTree = (nodes: TreeNode[]): TreeNode[] => {
+      return nodes
+        .map(node => {
+          // 현재 노드가 검색어와 일치하는지 확인
+          const isMatch = node.label.toLowerCase().includes(searchLower);
+          
+          // 자식 노드들을 재귀적으로 필터링
+          const filteredChildren = node.children 
+            ? filterTree(node.children)
+            : undefined;
+          
+          // 현재 노드가 일치하거나 자식 노드 중 일치하는 것이 있으면 포함
+          if (isMatch || (filteredChildren && filteredChildren.length > 0)) {
+            return {
+              ...node,
+              children: filteredChildren,
+            } as TreeNode;
+          }
+          
+          return null;
+        })
+        .filter((node): node is TreeNode => node !== null);
+    };
+
+    return filterTree(initialTreeData);
+  }, [searchTerm]);
 
   return (
     <Box sx={{ height: '100%', width: '100%' }}>
@@ -50,7 +106,15 @@ const PrimeTreePage = () => {
       <Paper sx={{ p: 2, mb: 2 }}>
         <Stack direction="row" spacing={2} alignItems="center">
           {/* 검색 입력 */}
-          <TextField label="그룹명/장비명/IP 검색" size="small" variant="outlined" />
+          <TextField 
+            label="트리 검색" 
+            size="small" 
+            variant="outlined"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            placeholder="노드 이름을 입력하세요..."
+            sx={{ minWidth: 200 }}
+          />
           {/* 버튼들 */}
           <Button variant="contained">장비추가</Button>
           <Button variant="outlined">장비삭제</Button>
@@ -63,7 +127,7 @@ const PrimeTreePage = () => {
         <Paper sx={{ width: 250, mr: 2, p: 1, overflow: 'auto' }}>
           {/* primereact Tree 컴포넌트 */}
           <Tree
-            value={treeData}
+            value={filteredTreeData}
             selectionMode="single"
             selectionKeys={selectedKey}
             onSelectionChange={e => {
