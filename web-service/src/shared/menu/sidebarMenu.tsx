@@ -16,6 +16,10 @@ export const menus: {key: string; value: string }[] = [
 		value: 'complex-tree',
 	},
 	{
+		key: 'mui-tree',
+		value: 'mui-tree',
+	},
+	{
 		key: 'statistics',
 		value: '통계',
 	},

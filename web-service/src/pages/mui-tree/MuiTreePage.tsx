@@ -1,67 +1,40 @@
 import { Box, Button, TextField, Typography, Paper, Stack } from '@mui/material';
 import { DataGrid, type GridColDef } from '@mui/x-data-grid';
-import { UncontrolledTreeEnvironment, Tree, StaticTreeDataProvider } from 'react-complex-tree';
-import 'react-complex-tree/lib/style-modern.css';
+import { RichTreeView } from '@mui/x-tree-view';
+import type { TreeViewBaseItem } from '@mui/x-tree-view/models';
 
-// 샘플 트리 데이터
-const treeData = {
-  items: {
-    root: {
-      index: 'root',
-      isFolder: true,
-      children: ['system', 'network', 'database'],
-      data: 'ROOT',
-    },
-    system: {
-      index: 'system',
-      isFolder: true,
-      children: ['k8s', 'wms'],
-      data: 'System',
-    },
-    network: {
-      index: 'network',
-      isFolder: true,
-      children: ['nms', 'sms'],
-      data: 'Network',
-    },
-    database: {
-      index: 'database',
-      isFolder: true,
-      children: ['dbms'],
-      data: 'Database',
-    },
-    k8s: {
-      index: 'k8s',
-      isFolder: false,
-      children: [],
-      data: 'Kubernetes',
-    },
-    wms: {
-      index: 'wms',
-      isFolder: false,
-      children: [],
-      data: 'WMS',
-    },
-    nms: {
-      index: 'nms',
-      isFolder: false,
-      children: [],
-      data: 'NMS',
-    },
-    sms: {
-      index: 'sms',
-      isFolder: false,
-      children: [],
-      data: 'SMS',
-    },
-    dbms: {
-      index: 'dbms',
-      isFolder: false,
-      children: [],
-      data: 'DBMS',
-    },
+// MUI X Tree View용 트리 데이터
+const treeData: TreeViewBaseItem[] = [
+  {
+    id: 'root',
+    label: 'ROOT',
+    children: [
+      {
+        id: 'system',
+        label: 'System',
+        children: [
+          { id: 'k8s', label: 'Kubernetes' },
+          { id: 'wms', label: 'WMS' },
+        ],
+      },
+      {
+        id: 'network',
+        label: 'Network',
+        children: [
+          { id: 'nms', label: 'NMS' },
+          { id: 'sms', label: 'SMS' },
+        ],
+      },
+      {
+        id: 'database',
+        label: 'Database',
+        children: [
+          { id: 'dbms', label: 'DBMS' },
+        ],
+      },
+    ],
   },
-};
+];
 
 // 샘플 그리드 데이터 및 컬럼 정의
 const columns: GridColDef[] = [
@@ -75,15 +48,16 @@ const columns: GridColDef[] = [
 const rows = [
   { id: 1, group: 'DBMS', device: '110.40 PostgreSQL', ip: '192.168.110.40', created: '2024-01-03 15:14', updated: '2024-08-19 15:29' },
   { id: 2, group: 'SMS', device: '110.43 DOFServer 1', ip: '192.168.110.43', created: '2024-01-09 08:17', updated: '2024-08-01 21:21' },
-  // ... 추가 데이터
+  { id: 3, group: 'NMS', device: '110.44 NMS Server', ip: '192.168.110.44', created: '2024-01-10 10:30', updated: '2024-08-15 14:22' },
+  { id: 4, group: 'WMS', device: '110.45 WMS Server', ip: '192.168.110.45', created: '2024-01-12 09:15', updated: '2024-08-18 11:45' },
+  { id: 5, group: 'k8s', device: '110.46 Kubernetes', ip: '192.168.110.46', created: '2024-01-15 16:20', updated: '2024-08-20 08:30' },
 ];
 
-const ComplexTreePage = () => {
-
+const MuiTreePage = () => {
   return (
     <Box sx={{ height: '100%', width: '100%' }}>
       {/* 상단 타이틀 및 검색/버튼 영역 */}
-      <Typography variant="h5" sx={{ mb: 2 }}>Prime Tree + MUIX Data Grid</Typography>
+      <Typography variant="h5" sx={{ mb: 2 }}>MUI X Tree View + MUIX Data Grid</Typography>
       <Paper sx={{ p: 2, mb: 2 }}>
         <Stack direction="row" spacing={2} alignItems="center">
           {/* 검색 입력 */}
@@ -98,14 +72,11 @@ const ComplexTreePage = () => {
       <Box sx={{ display: 'flex', height: 600 }}>
         {/* 좌측 트리 영역 */}
         <Paper sx={{ width: 250, mr: 2, p: 1, overflow: 'auto' }}>
-          {/* primereact Tree 컴포넌트 */}
-          <UncontrolledTreeEnvironment
-            dataProvider={new StaticTreeDataProvider(treeData.items, (item, data) => ({ ...item, data }))}
-            getItemTitle={item => item.data}
-            viewState={{}}
-          >
-            <Tree treeId="tree-1" rootItem="root" treeLabel="그룹 트리" />
-          </UncontrolledTreeEnvironment>
+          {/* MUI X Tree View 컴포넌트 */}
+          <RichTreeView
+            items={treeData}
+            defaultExpandedItems={['root', 'system', 'network', 'database']}
+          />
         </Paper>
         {/* 우측 그리드 영역 */}
         <Box sx={{ flex: 1 }}>
@@ -126,4 +97,4 @@ const ComplexTreePage = () => {
   );
 };
 
-export default ComplexTreePage; 
+export default MuiTreePage; 

@@ -3,6 +3,7 @@ import MainPage from "@/pages/main/MainPage";
 import PrimeTreePage from "@/pages/prime-tree/PrimeTreePage";
 import CustomTreePage from "@/pages/custom-tree/CustomTreePage";
 import ComplexTreePage from "@/pages/complex-tree/ComplexTreePage";
+import MuiTreePage from "@/pages/mui-tree/MuiTreePage";
 import type { RouteObject } from "react-router-dom";
 
 export const routes: RouteObject[] = [
@@ -25,5 +26,9 @@ export const routes: RouteObject[] = [
 	{
 		path: "complex-tree",
 		element: <ComplexTreePage />,
+	},
+	{
+		path: "mui-tree",
+		element: <MuiTreePage />,
 	},
 ];
