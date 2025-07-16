@@ -23,6 +23,7 @@
     "primeicons": "^7.0.0",
     "primereact": "^10.9.6",
     "react": "^19.1.0",
+    "react-arborist": "^3.4.3",
     "react-complex-tree": "^2.6.0",
     "react-dom": "^19.1.0",
     "react-router-dom": "^7.6.3",
